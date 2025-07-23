@@ -1,6 +1,5 @@
 # 🖥️ QuantIntelli+ – Standalone Frontend UI
 
-![QuantIntelli+ Interface Preview]🖥️
 
 A sleek, responsive, and modern **frontend-only interface** for **QuantIntelli+**, designed to deliver a premium user experience for sports analytics and AI-powered betting insights — all powered by a Gradio backend.
 
