@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuantIntelli+ ⚽</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              100: '#1f2937', 200: '#111827', 300: '#0f172a', 400: '#0b0f19', 500: '#060818',
+            },
+            accent: {
+              100: '#93c5fd', 200: '#60a5fa', 300: '#3b82f6', 400: '#2563eb', 500: '#1d4ed8',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #0b0f19; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .pulse { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:0.5 } }
+    .typing-indicator { display: flex; align-items: center; }
+    .typing-indicator span {
+      width:6px; height:6px; margin:0 1px; background-color:#60a5fa;
+      border-radius:50%; display:inline-block; opacity:0.6;
+    }
+    .typing-indicator span:nth-child(1){ animation:bouncing 1s infinite 0.2s; }
+    .typing-indicator span:nth-child(2){ animation:bouncing 1s infinite 0.4s; }
+    .typing-indicator span:nth-child(3){ animation:bouncing 1s infinite 0.6s; }
+    @keyframes bouncing { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-5px) } }
+    .custom-scrollbar::-webkit-scrollbar { width:5px }
+    .custom-scrollbar::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); border-radius:10px }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:10px }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.2) }
+    .glass-effect { background:rgba(255,255,255,0.05); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.1) }
+    .glow-effect { box-shadow:0 0 15px rgba(59,130,246,0.3) }
+    .message-content {
+      line-height: 1.6; overflow-wrap: break-word; word-wrap: break-word; font-size: 0.95rem; color: #d1d5db;
+    }
+    .message-content strong, .message-content b { color: #e5e7eb; font-weight: 600; }
+    .message-content hr { border: 0; height: 1px; background: rgba(255,255,255,0.15); margin: 20px 0; }
+    .message-content ul, .message-content ol { padding-left: 25px; margin: 12px 0; }
+    .message-content li { margin-bottom: 6px; }
+    .message-content p { margin-bottom: 0.75em; }
+    .message-content p:last-child { margin-bottom: 0; }
+    .message-content .table-wrapper {
+      overflow-x: auto; margin: 18px 0; border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px; background-color: rgba(255, 255, 255, 0.02); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .message-content table { border-collapse: collapse; width: 100%; font-size: 0.875rem; }
+    .message-content th, .message-content td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1); border-left: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 14px; text-align: left; vertical-align: top; line-height: 1.5;
+    }
+    .message-content td:first-child, .message-content th:first-child { border-left: none; }
+    .message-content th { background-color: rgba(59, 130, 246, 0.1); font-weight: 600; color: #cbd5e1; }
+    .message-content td { color: #b0bec5; }
+    .message-content tr:last-child td { border-bottom: none; }
+    .message-content tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.015); }
+    .message-content tr:nth-child(odd) { background-color: rgba(255, 255, 255, 0.005); }
+    .message-content tr:hover { background-color: rgba(59, 130, 246, 0.08); }
+  </style>
+</head>
+
+<body class="bg-dark-400 text-gray-200 min-h-screen flex flex-col">
+  <header class="bg-dark-300 border-b border-gray-700 shadow-lg">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="bg-accent-400 p-2 rounded-lg"><i class="fas fa-robot text-white"></i></div>
+        <div>
+          <h1 class="text-xl font-bold text-white">QuantIntelli+</h1>
+          <p class="text-xs text-gray-400">Intelligent Sports Analytics</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div id="connection-status" class="flex items-center px-3 py-1 rounded-full bg-dark-200 border border-gray-700">
+          <span class="h-2 w-2 rounded-full bg-green-500 mr-2 pulse"></span>
+          <span class="text-xs font-medium text-gray-300">Connected</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 container mx-auto px-4 py-6 flex flex-col gap-4 max-w-7xl">
+    <div class="bg-dark-300 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+      <div class="bg-dark-200 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+        <h2 class="font-medium text-gray-200 flex items-center">
+          <i class="fas fa-chart-bar text-accent-300 mr-2"></i> Quick Analysis
+        </h2>
+      </div>
+      <div class="p-4 flex flex-wrap gap-4 items-center">
+        <div class="flex flex-wrap gap-2">
+          <button id="enter-odds-btn" class="px-4 py-2 bg-dark-200 hover:bg-dark-100 text-gray-300 rounded-lg border border-gray-700 flex items-center transition duration-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-opacity-50">
+            <i class="fas fa-percent text-accent-300 mr-2"></i> Enter Match Odds
+          </button>
+          <button id="analyze-match-btn" class="px-4 py-2 bg-dark-200 hover:bg-dark-100 text-gray-300 rounded-lg border border-gray-700 flex items-center transition duration-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-opacity-50">
+            <i class="fas fa-chart-line text-accent-300 mr-2"></i> Analyze Match
+          </button>
+          <button id="betting-tips-btn" class="px-4 py-2 bg-dark-200 hover:bg-dark-100 text-gray-300 rounded-lg border border-gray-700 flex items-center transition duration-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-opacity-50">
+            <i class="fas fa-lightbulb text-accent-300 mr-2"></i> Betting Tips
+          </button>
+        </div>
+        <div class="flex items-center space-x-3 ml-auto">
+          <div class="flex items-center space-x-2 text-sm">
+            <div id="analysis-status-indicator" class="h-2 w-2 rounded-full bg-gray-500"></div>
+            <div id="analysis-status-text" class="text-gray-400">Analysis Mode: OFF</div>
+          </div>
+           <div class="flex items-center space-x-2 text-sm text-gray-400">
+            <div id="status-icon" class="h-2 w-2 rounded-full bg-green-500"></div>
+            <div id="status-message">Ready to assist</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-4">
+      <div id="chat-container" class="w-full bg-dark-300 rounded-xl shadow-lg border border-gray-700 overflow-hidden flex flex-col">
+        <div class="bg-dark-200 px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+          <h2 class="font-medium text-gray-200 flex items-center">
+            <i class="fas fa-comments text-accent-300 mr-2"></i> Conversation
+          </h2>
+          <button id="clear-chat" class="text-sm text-gray-400 hover:text-accent-300 flex items-center transition duration-200">
+            <i class="fas fa-trash-alt mr-1"></i> Clear
+          </button>
+        </div>
+
+        <div id="messages" class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4" style="min-height:400px">
+          <div class="text-center text-gray-500 py-8">
+            <div class="w-16 h-16 bg-dark-200 rounded-full flex items-center justify-center mx-auto mb-3 border border-gray-700">
+              <i class="fas fa-robot text-2xl text-accent-300"></i>
+            </div>
+            <p class="text-sm">Start a conversation with your Quant</p>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-700 p-3 sm:p-4 bg-dark-200">
+          <form id="message-form" class="flex flex-col sm:flex-row items-center gap-2">
+            <div class="relative w-full sm:flex-1">
+              <input
+                id="message-input"
+                type="text"
+                placeholder="Type your message..."
+                class="w-full px-4 py-3 rounded-lg bg-dark-100 border border-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-accent-400 placeholder-gray-500"
+                autocomplete="off"
+              />
+            </div>
+            <div class="flex items-center w-full sm:w-auto space-x-2">
+                <button
+                  type="button"
+                  id="analysis-mode-toggle"
+                  class="p-3 rounded-lg bg-dark-100 hover:bg-dark-500 border border-gray-700 text-gray-400 hover:text-accent-300 transition duration-200 focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-opacity-50"
+                  title="Analysis Mode: OFF"
+                >
+                  <i class="fas fa-brain"></i>
+                </button>
+                <button
+                  type="submit"
+                  class="flex-grow sm:flex-grow-0 px-4 py-3 bg-accent-400 hover:bg-accent-500 text-white rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-accent-300 focus:ring-offset-2 focus:ring-offset-dark-300 flex items-center justify-center"
+                >
+                  <i class="fas fa-paper-plane sm:mr-2"></i>
+                  <span class="hidden sm:inline">Send</span>
+                </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-dark-300 border-t border-gray-700 py-3 text-xs text-center text-gray-500">
+    <div class="container mx-auto">
+      <p>© <span id="current-year"></span> QuantIntelli+ – All rights reserved</p>
+    </div>
+  </footer>
+
+  
+ <script type="module">
+  import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+  document.getElementById('current-year').textContent = new Date().getFullYear();
+
+  const analysisStatusIndicator = document.getElementById("analysis-status-indicator");
+  const analysisStatusText = document.getElementById("analysis-status-text");
+  const statusMessage = document.getElementById("status-message");
+  const statusIcon = document.getElementById("status-icon");
+  const messageForm = document.getElementById("message-form");
+  const messageInput = document.getElementById("message-input");
+  const messagesContainer = document.getElementById("messages");
+  const clearChatBtn = document.getElementById("clear-chat");
+  const connectionStatusEl = document.getElementById("connection-status");
+  const analysisModeToggleBtn = document.getElementById("analysis-mode-toggle");
+
+  let client = null;
+  const chatHistory = [];
+  let isAnalysisModeOn = false;
+
+  function updateStatus(statusType, text) {
+    if (!statusIcon || !statusMessage) return;
+    switch(statusType) {
+      case 'ready':    statusIcon.className = "h-2 w-2 rounded-full bg-green-500"; break;
+      case 'thinking': statusIcon.className = "h-2 w-2 rounded-full bg-yellow-500 pulse"; break;
+      case 'error':    statusIcon.className = "h-2 w-2 rounded-full bg-red-500"; break;
+      case 'connecting': statusIcon.className = "h-2 w-2 rounded-full bg-blue-500 pulse"; break;
+      default:         statusIcon.className = "h-2 w-2 rounded-full bg-gray-500";
+    }
+    statusMessage.textContent = text;
+  }
+
+  function updateConnectionStatus(connected) {
+    const dot = connectionStatusEl.querySelector("span:first-child");
+    const txt = connectionStatusEl.querySelector("span:last-child");
+    if (dot && txt) {
+      if (connected) {
+        dot.className = "h-2 w-2 rounded-full bg-green-500 mr-2 pulse";
+        txt.textContent = "Connected";
+      } else {
+        dot.className = "h-2 w-2 rounded-full bg-red-500 mr-2";
+        txt.textContent = "Disconnected";
+      }
+    }
+    if (connected) {
+      updateStatus('ready', 'Ready to assist');
+    } else {
+      if (statusMessage && !statusMessage.textContent.includes("Connecting")) {
+        updateStatus('error', 'Not connected');
+      }
+    }
+  }
+
+  function updateAnalysisStatusUI(isOn) {
+    const button = analysisModeToggleBtn;
+    if (!button || !analysisStatusIndicator || !analysisStatusText) return;
+    if (isOn) {
+      analysisStatusIndicator.className = "h-2 w-2 rounded-full bg-accent-400";
+      analysisStatusText.className = "text-accent-300";
+      analysisStatusText.textContent = "Analysis Mode: ON";
+      button.classList.remove('bg-dark-100', 'hover:bg-dark-500', 'text-gray-400', 'hover:text-accent-300', 'border', 'border-gray-700');
+      button.classList.add('bg-accent-400', 'text-white', 'hover:bg-accent-500');
+      button.title = "Analysis Mode: ON";
+    } else {
+      analysisStatusIndicator.className = "h-2 w-2 rounded-full bg-gray-500";
+      analysisStatusText.className = "text-gray-400";
+      analysisStatusText.textContent = "Analysis Mode: OFF";
+      button.classList.remove('bg-accent-400', 'text-white', 'hover:bg-accent-500');
+      button.classList.add('bg-dark-100', 'hover:bg-dark-500', 'border', 'border-gray-700', 'text-gray-400', 'hover:text-accent-300');
+      button.title = "Analysis Mode: OFF";
+    }
+  }
+
+  async function initGradio() {
+    updateStatus('connecting', 'Connecting to Gradio...');
+    updateConnectionStatus(false);
+
+    try {
+      // Connect directly to the public Gradio app — NO TOKEN NEEDED
+      client = await Client.connect("ChillThrills/QuantIntelli");
+      updateConnectionStatus(true);
+      addMessage("Hello! I'm ready to assist with sports analytics and betting insights. How can I help?", false);
+    } catch (error) {
+      console.error("Failed to connect to Gradio app:", error);
+      updateConnectionStatus(false);
+      let errorMsg = "Could not connect to the Gradio app. Please check if it's online or accessible.";
+      if (error.message.includes("CORS") || error.message.includes("network")) {
+        errorMsg = "Network error: Cannot reach the Gradio backend. Check your internet or if the app is down.";
+      }
+      addMessage(`⚠️ ${errorMsg}`, false);
+      updateStatus('error', 'Connection failed');
+    }
+  }
+
+  function addMessage(msg, isUser = false) {
+    if (!messagesContainer) return;
+
+    const initial = messagesContainer.querySelector(".text-center.text-gray-500.py-8");
+    if (initial) initial.remove();
+
+    const messageWrapperDiv = document.createElement("div");
+    messageWrapperDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} fade-in`;
+
+    const bubbleDiv = document.createElement("div");
+    bubbleDiv.className = `rounded-lg px-4 py-3 max-w-4xl ${
+      isUser
+        ? 'bg-accent-400 text-white'
+        : 'bg-dark-200 text-gray-200 border border-gray-700'
+    }`;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+
+    if (isUser) {
+      contentDiv.textContent = msg;
+    } else {
+      if (typeof marked === 'undefined') {
+        contentDiv.textContent = msg;
+      } else {
+        contentDiv.innerHTML = marked.parse(msg, { gfm: true, breaks: true });
+      }
+
+      // Enhance tables with scrollable wrapper
+      const tables = contentDiv.querySelectorAll('table');
+      tables.forEach(table => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrapper';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+        if (!table.classList.contains('w-full')) {
+          table.classList.add('w-full');
+        }
+      });
+    }
+
+    bubbleDiv.appendChild(contentDiv);
+    messageWrapperDiv.appendChild(bubbleDiv);
+    messagesContainer.appendChild(messageWrapperDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  function showTyping() {
+    const existing = document.getElementById("typing-indicator-bubble");
+    if (existing) existing.remove();
+
+    const typing = document.createElement("div");
+    typing.id = "typing-indicator-bubble";
+    typing.className = "flex justify-start fade-in";
+    typing.innerHTML = `
+      <div class="bg-dark-200 text-gray-300 rounded-lg px-4 py-3 border border-gray-700 flex items-center max-w-4xl">
+        <div class="typing-indicator">Assistant is thinking<span>.</span><span>.</span><span>.</span></div>
+      </div>`;
+    messagesContainer.appendChild(typing);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  function hideTyping() {
+    const t = document.getElementById("typing-indicator-bubble");
+    if (t) t.remove();
+  }
+
+  async function makeAPICall(message) {
+    if (!client) {
+      addMessage("❌ Not connected to the assistant. Please reload the page.", false);
+      updateStatus('error', 'Not connected');
+      return;
+    }
+
+    showTyping();
+    updateStatus('thinking', 'Thinking...');
+
+    try {
+      chatHistory.push({ role: 'user', content: message });
+
+      const result = await client.predict("/agent_interface", {
+        user_message: message,
+        history_messages: JSON.parse(JSON.stringify(chatHistory))
+      });
+
+      hideTyping();
+
+      let replyContent = "No valid response received.";
+      let processed = false;
+
+      if (result && Array.isArray(result.data)) {
+        const output = result.data[0];
+
+        // Case 1: Full history array with role/content
+        if (Array.isArray(output) && output.length > 0 && output[0]?.role) {
+          const fullHistory = output;
+          const last = fullHistory[fullHistory.length - 1];
+          if (last.role === 'assistant') replyContent = last.content;
+          chatHistory.splice(0); // Clear and replace
+          fullHistory.forEach(msg => chatHistory.push({
+            role: msg.role,
+            content: msg.content,
+            metadata: msg.metadata || null
+          }));
+          processed = true;
+        }
+        // Case 2: Direct string response
+        else if (typeof output === 'string') {
+          replyContent = output;
+          chatHistory.push({ role: 'assistant', content: replyContent });
+          processed = true;
+        }
+      }
+
+      if (!processed) {
+        console.warn("Unexpected response format:", result);
+        replyContent = "Received an unknown response format.";
+      }
+
+      addMessage(replyContent, false);
+      updateStatus('ready', 'Ready to assist');
+    } catch (err) {
+      hideTyping();
+      console.error("API Error:", err);
+      const errMsg = err.message.includes("network") 
+        ? "Network error: Unable to reach the server. Is the app online?" 
+        : `Error: ${err.message}`;
+      addMessage(`⚠️ ${errMsg}`, false);
+      updateStatus('error', 'Request failed');
+      
+      // Rollback user message on error
+      if (chatHistory.length && chatHistory[chatHistory.length - 1].content === message) {
+        chatHistory.pop();
+      }
+    }
+  }
+
+  // Form submission
+  messageForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = messageInput?.value.trim();
+    if (!text) return;
+    addMessage(text, true);
+    messageInput.value = '';
+    makeAPICall(text);
+  });
+
+  // Clear chat
+  clearChatBtn?.addEventListener("click", () => {
+    messagesContainer.innerHTML = `
+      <div class="text-center text-gray-500 py-8">
+        <div class="w-16 h-16 bg-dark-200 rounded-full flex items-center justify-center mx-auto mb-3 border border-gray-700">
+          <i class="fas fa-robot text-2xl text-accent-300"></i>
+        </div>
+        <p class="text-sm">Start a conversation with your Quant</p>
+      </div>`;
+    chatHistory.length = 0;
+    updateStatus('ready', 'Chat cleared');
+    console.log("Chat cleared locally.");
+  });
+
+  // Quick action buttons
+  document.getElementById("enter-odds-btn")?.addEventListener("click", () => {
+    messageInput.value = "I want to enter match odds";
+    messageInput.focus();
+  });
+  document.getElementById("analyze-match-btn")?.addEventListener("click", () => {
+    messageInput.value = "Analyze this Match";
+    messageInput.focus();
+  });
+  document.getElementById("betting-tips-btn")?.addEventListener("click", () => {
+    messageInput.value = "Show me betting tips";
+    messageInput.focus();
+  });
+
+  // Toggle Analysis Mode
+  analysisModeToggleBtn?.addEventListener("click", () => {
+    isAnalysisModeOn = !isAnalysisModeOn;
+    updateAnalysisStatusUI(isAnalysisModeOn);
+    if (client) {
+      client.predict("/toggle_analysis_mode_display").catch(err =>
+        console.warn("Failed to sync analysis mode with backend:", err)
+      );
+    }
+  });
+
+  // Initialize on load
+  document.addEventListener("DOMContentLoaded", () => {
+    initGradio();
+    updateAnalysisStatusUI(isAnalysisModeOn);
+  });
+</script>
+</body>
+</html>
