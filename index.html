@@ -58,6 +58,8 @@
     .message-content li { margin-bottom: 6px; }
     .message-content p { margin-bottom: 0.75em; }
     .message-content p:last-child { margin-bottom: 0; }
+    .message-content code { background-color: rgba(0,0,0,0.2); padding: 2px 5px; border-radius: 4px; font-family: monospace; }
+    .message-content kbd { padding: 0.1rem 0.4rem; font-size: 85%; color: #e5e7eb; background-color: #374151; border-radius: 0.25rem; border: 1px solid #4b5563;}
     .message-content .table-wrapper {
       overflow-x: auto; margin: 18px 0; border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 6px; background-color: rgba(255, 255, 255, 0.02); box-shadow: 0 1px 3px rgba(0,0,0,0.2);
@@ -88,6 +90,9 @@
         </div>
       </div>
       <div class="flex items-center space-x-4">
+        <button id="help-btn" class="text-gray-400 hover:text-accent-300 transition duration-200" title="How to Use">
+          <i class="fas fa-question-circle text-xl"></i>
+        </button>
         <div id="connection-status" class="flex items-center px-3 py-1 rounded-full bg-dark-200 border border-gray-700">
           <span class="h-2 w-2 rounded-full bg-green-500 mr-2 pulse"></span>
           <span class="text-xs font-medium text-gray-300">Connected</span>
@@ -188,6 +193,42 @@
     </div>
   </footer>
 
+  <!-- Help Modal -->
+  <div id="help-modal" class="fixed hidden inset-0 bg-dark-500 bg-opacity-80 backdrop-blur-sm flex justify-center items-center p-4 z-50 fade-in">
+    <div class="bg-dark-300 border border-gray-700 rounded-xl shadow-2xl max-w-2xl w-full glass-effect glow-effect relative">
+      <div class="flex justify-between items-center p-4 border-b border-gray-700">
+        <h3 class="text-lg font-semibold text-white flex items-center"><i class="fas fa-info-circle text-accent-300 mr-2"></i> How to Use QuantIntelli+</h3>
+        <button id="close-modal-btn" class="text-gray-500 hover:text-white transition-colors">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="p-6 text-gray-300 space-y-4 message-content custom-scrollbar" style="max-height: 70vh; overflow-y: auto;">
+        <div class="bg-dark-200 p-4 rounded-lg border border-gray-600">
+          <h4 class="font-semibold text-accent-200 text-md mb-2">1. Enter Match Odds</h4>
+          <p>To get a basic prediction, provide the match and odds in a single line. For example:</p>
+          <ul class="list-disc list-inside space-y-2 pl-2">
+            <li><code>Liverpool vs Chelsea 2.1 3.4 3.8</code></li>
+            <li><code>Liverpool - Chelsea 2.1 3.4 3.8</code></li>
+            <p>With the odds being in the following order</p>
+            <li><code>Home odds:2.1 Draw odds:3.4 Away odds:3.8</code></li>
+          </ul>
+          <p class="mt-2">Then hit <strong class="text-white">Send</strong> or press <kbd>Enter</kbd>.</p>
+        </div>
+        <div class="bg-dark-200 p-4 rounded-lg border border-gray-600">
+          <h4 class="font-semibold text-accent-200 text-md mb-2">2. Get Deep Analysis</h4>
+          <p>After a prediction, you can request a detailed breakdown.</p>
+          <ol class="list-decimal list-inside space-y-2 pl-2">
+            <li>Click the <i class="fas fa-brain"></i> button to toggle to <strong class="text-accent-300">Analysis: ON</strong>.</li>
+            <li>Type <code>Analyze this match</code> (or similar) and hit <strong class="text-white">Send</strong>.</li>
+          </ol>
+        </div>
+        <div class="bg-dark-200 p-4 rounded-lg border border-gray-600">
+          <h4 class="font-semibold text-accent-200 text-md mb-2">3. General Chat</h4>
+          <p>Ask general questions or discuss betting strategies. Ensure <strong class="text-gray-400">Analysis Mode is OFF</strong> for normal chat.</p>
+        </div>
+      </div>
+    </div>
+  </div>
   
  <script type="module">
   import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
@@ -204,6 +245,9 @@
   const clearChatBtn = document.getElementById("clear-chat");
   const connectionStatusEl = document.getElementById("connection-status");
   const analysisModeToggleBtn = document.getElementById("analysis-mode-toggle");
+  const helpBtn = document.getElementById("help-btn");
+  const helpModal = document.getElementById("help-modal");
+  const closeModalBtn = document.getElementById("close-modal-btn");
 
   let client = null;
   const chatHistory = [];
@@ -267,10 +311,9 @@
     updateConnectionStatus(false);
 
     try {
-      // Connect directly to the public Gradio app — NO TOKEN NEEDED
       client = await Client.connect("ChillThrills/QuantIntelli");
       updateConnectionStatus(true);
-      addMessage("Hello! I'm ready to assist with sports analytics and betting insights. How can I help?", false);
+      addMessage("Hello! I'm ready to assist with sports analytics and betting insights. How can I help? (Click the <i class='fas fa-question-circle'></i> icon for instructions)", false);
     } catch (error) {
       console.error("Failed to connect to Gradio app:", error);
       updateConnectionStatus(false);
@@ -311,7 +354,6 @@
         contentDiv.innerHTML = marked.parse(msg, { gfm: true, breaks: true });
       }
 
-      // Enhance tables with scrollable wrapper
       const tables = contentDiv.querySelectorAll('table');
       tables.forEach(table => {
         const wrapper = document.createElement('div');
@@ -369,19 +411,16 @@
       });
 
       hideTyping();
-
       let replyContent = "No valid response received.";
       let processed = false;
 
       if (result && Array.isArray(result.data)) {
         const output = result.data[0];
-
-        // Case 1: Full history array with role/content
         if (Array.isArray(output) && output.length > 0 && output[0]?.role) {
           const fullHistory = output;
           const last = fullHistory[fullHistory.length - 1];
           if (last.role === 'assistant') replyContent = last.content;
-          chatHistory.splice(0); // Clear and replace
+          chatHistory.splice(0);
           fullHistory.forEach(msg => chatHistory.push({
             role: msg.role,
             content: msg.content,
@@ -389,7 +428,6 @@
           }));
           processed = true;
         }
-        // Case 2: Direct string response
         else if (typeof output === 'string') {
           replyContent = output;
           chatHistory.push({ role: 'assistant', content: replyContent });
@@ -413,14 +451,12 @@
       addMessage(`⚠️ ${errMsg}`, false);
       updateStatus('error', 'Request failed');
       
-      // Rollback user message on error
       if (chatHistory.length && chatHistory[chatHistory.length - 1].content === message) {
         chatHistory.pop();
       }
     }
   }
 
-  // Form submission
   messageForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const text = messageInput?.value.trim();
@@ -430,7 +466,6 @@
     makeAPICall(text);
   });
 
-  // Clear chat
   clearChatBtn?.addEventListener("click", () => {
     messagesContainer.innerHTML = `
       <div class="text-center text-gray-500 py-8">
@@ -441,24 +476,21 @@
       </div>`;
     chatHistory.length = 0;
     updateStatus('ready', 'Chat cleared');
-    console.log("Chat cleared locally.");
   });
 
-  // Quick action buttons
   document.getElementById("enter-odds-btn")?.addEventListener("click", () => {
-    messageInput.value = "I want to enter match odds";
+    messageInput.value = "Liverpool vs Chelsea 2.1 3.4 3.8";
     messageInput.focus();
   });
   document.getElementById("analyze-match-btn")?.addEventListener("click", () => {
-    messageInput.value = "Analyze this Match";
+    messageInput.value = "Analyze this match";
     messageInput.focus();
   });
   document.getElementById("betting-tips-btn")?.addEventListener("click", () => {
-    messageInput.value = "Show me betting tips";
+    messageInput.value = "What are some general betting tips?";
     messageInput.focus();
   });
 
-  // Toggle Analysis Mode
   analysisModeToggleBtn?.addEventListener("click", () => {
     isAnalysisModeOn = !isAnalysisModeOn;
     updateAnalysisStatusUI(isAnalysisModeOn);
@@ -469,7 +501,18 @@
     }
   });
 
-  // Initialize on load
+  // Modal listeners
+  helpBtn?.addEventListener("click", () => helpModal?.classList.remove("hidden"));
+  closeModalBtn?.addEventListener("click", () => helpModal?.classList.add("hidden"));
+  helpModal?.addEventListener("click", (e) => {
+      if (e.target === helpModal) helpModal.classList.add("hidden");
+  });
+  document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !helpModal.classList.contains('hidden')) {
+          helpModal.classList.add('hidden');
+      }
+  });
+
   document.addEventListener("DOMContentLoaded", () => {
     initGradio();
     updateAnalysisStatusUI(isAnalysisModeOn);
