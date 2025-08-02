@@ -9,7 +9,7 @@ This project contains **only the UI layer** (HTML, CSS, JS) and connects directl
 🚀 **Live Demo**:  
 👉 [https://iandublew.github.io/quantintelli-UI/](https://iandublew.github.io/quantintelli-UI)
 
-✔ **Backend Logic**: 
+✔ **Backend Logic**:  
 👉 [https://github.com/IanDublew/QuantIntelli](https://github.com/IanDublew/QuantIntelli)
 
 📊 **Prediction Analysis**:  
