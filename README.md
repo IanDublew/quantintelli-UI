@@ -13,6 +13,6 @@ This project contains **only the UI layer** (HTML, CSS, JS) and connects directl
 👉 [https://github.com/IanDublew/QuantIntelli](https://github.com/IanDublew/QuantIntelli)
 
 📊 **Leaderboard**: 
-👉 [https://github.com/IanDublew/QuantIntelli-Leaderboard](https://iandublew.github.io/QuantIntelli-Leaderboard)
+👉 [https://iandublew.github.io/QuantIntelli-Leaderboard](https://iandublew.github.io/QuantIntelli-Leaderboard)
 
 
